@@ -1,0 +1,66 @@
+GENERAL:
+  GPU_ID: 0
+  SEED: 123
+  WORKER: 8
+  SAVE_PREFIX: './outputs/prism'
+  EXP_NAME: 'FaDeNet'
+
+DATA:
+  DATA_TYPE: PRISM
+  TRAIN_DATASET: './dataset/PRISM/train'
+  TEST_DATASET: './dataset/PRISM/test'
+
+MODEL:
+  # Trunk downsamples 3 times (x8). Keep inference padded to multiples of 8.
+  PAD_MULTIPLE: 8
+
+  # Network capacity.
+  BASE_CHANNELS: 48
+  NUM_BLOCKS: [2, 2, 2, 2]
+
+  # Base/Detail decomposition (adaptive Gaussian low-pass via s2_5conv).
+  BLUR_KERNEL_SIZE: 5
+  BLUR_SIGMA: 1.2
+
+  # Detail correction strength (smaller = more conservative).
+  DETAIL_ALPHA: 0.35
+
+  # Enable FFT-based frequency gating in coarse scales (1/4, 1/8).
+  FFT_GATE_SCALES: [False, False, True, True]
+
+TRAIN:
+  BATCH_SIZE: 4
+  LOADER: crop
+  CROP_SIZE: 384
+  RESIZE_SIZE: 384
+  SAVE_ITER: 500
+  LOAD_EPOCH: 0   # 0 = from scratch; set N to resume from checkpoint_%06d.tar
+  WEIGHT_DECAY: 0.0
+
+  # Loss weights (L1 + high-pass).
+  LAMBDA_IMG: 1.0
+  LAMBDA_BASE: 0.0
+  LAMBDA_DETAIL: 0.0
+  LAMBDA_HP: 0.3
+  LAMBDA_GRAD: 0.0
+  LAMBDA_MASK: 0.0
+
+  # Mask regularization internal weights (unused when LAMBDA_MASK=0).
+  MASK_L1: 1.0
+  MASK_TV: 1.0
+
+TEST:
+  TEST_EPOCH: auto
+  SAVE_IMG: False
+  LOAD_PATH: False
+  EVALUATION_METRIC: True
+  EVALUATION_TIME: False
+  EVALUATION_COST: False
+
+SOLVER:
+  EPOCHS: 200
+  T_0: 50
+  T_MULT: 1
+  ETA_MIN: 0.000001
+  BASE_LR: 0.0002
+  BETA1: 0.9
